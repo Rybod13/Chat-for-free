@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #1a73e8;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        #loginForm, #signupForm {
+            display: none;
+        }
+        .active {
+            display: block !important;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm" class="active">
+            <h2>Login</h2>
+            <div class="form-group">
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="Password">
+            </div>
+            <div class="error" id="loginError"></div>
+            <button onclick="login()">Login</button>
+            <div class="toggle-form">
+                <button class="toggle-btn" onclick="toggleForms()">Need an account? Sign up</button>
+            </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm">
+            <h2>Sign Up</h2>
+            <div class="form-group">
+                <input type="text" id="signupUsername" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="password" id="signupPassword" placeholder="Password">
+            </div>
+            <div class="form-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password">
+            </div>
+            <div class="error" id="signupError"></div>
+            <button onclick="signup()">Sign Up</button>
+            <div class="toggle-form">
+                <button class="toggle-btn" onclick="toggleForms()">Already have an account? Login</button>
+            </div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" style="display: none;">
+            <h2>Welcome!</h2>
+            <p id="welcomeMessage"></p>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // Create admin account on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminUser = {
+                username: 'admin',
+                password: 'admin'
+            };
+            localStorage.setItem('admin', JSON.stringify(adminUser));
+        });
+
+        function toggleForms() {
+            document.getElementById('loginForm').classList.toggle('active');
+            document.getElementById('signupForm').classList.toggle('active');
+            // Clear error messages
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('signupError').textContent = '';
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Check if user exists
+            const storedUser = localStorage.getItem(username);
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                if (user.password === password) {
+                    showWelcomeScreen(username);
+                    return;
+                }
+            }
+            
+            document.getElementById('loginError').textContent = 'Invalid username or password';
+        }
+
+        function signup() {
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (!username || !password) {
+                document.getElementById('signupError').textContent = 'Please fill in all fields';
+                return;
+            }
+            
+            if (password !== confirmPass) {
+                document.getElementById('signupError').textContent = 'Passwords do not match';
+                return;
+            }
+            
+            // Check if username already exists
+            if (localStorage.getItem(username)) {
+                document.getElementById('signupError').textContent = 'Username already exists';
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                username: username,
+                password: password
+            };
+            
+            localStorage.setItem(username, JSON.stringify(newUser));
+            showWelcomeScreen(username);
+        }
+
+        function showWelcomeScreen(username) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'block';
+            document.getElementById('welcomeMessage').textContent = `Hello, ${username}!`;
+            
+            // Clear forms
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('signupUsername').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        function logout() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
